@@ -61,6 +61,23 @@ async function downloadFile(url) {
   return tmp;
 }
 
+function compressIfNeeded(filePath) {
+  const MAX_SIZE = 24 * 1024 * 1024; // 24MB (under Whisper 25MB limit)
+  const stat = readFileSync(filePath);
+  if (stat.length <= MAX_SIZE) return filePath;
+
+  // Compress to mp3 using ffmpeg
+  const mp3Path = join(tmpdir(), `transcribe-${Date.now()}.mp3`);
+  try {
+    execSync(`ffmpeg -i "${filePath}" -ac 1 -ar 16000 -b:a 64k "${mp3Path}" -y`, {
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return mp3Path;
+  } catch {
+    return filePath; // Fall back to original if ffmpeg unavailable
+  }
+}
+
 async function transcribe(filePath, config) {
   const apiKey = resolveApiKey(config);
   if (!apiKey) {
@@ -73,7 +90,12 @@ async function transcribe(filePath, config) {
     baseURL: resolveBaseURL(config),
   });
 
-  const fileHandle = await OpenAI.toFile(readFileSync(filePath), filePath.split("/").pop());
+  const sendPath = compressIfNeeded(filePath);
+  const fileHandle = await OpenAI.toFile(readFileSync(sendPath), sendPath.split("/").pop());
+  if (sendPath !== filePath) {
+    try { unlinkSync(sendPath); } catch {}
+  }
+
   const response = await openai.audio.transcriptions.create({
     file: fileHandle,
     model: "whisper-1",

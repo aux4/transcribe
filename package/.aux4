@@ -1,0 +1,62 @@
+{
+  "scope": "aux4",
+  "name": "transcribe",
+  "version": "1.0.0",
+  "description": "Transcribe audio and video files to text with timestamps",
+  "license": "MIT",
+  "tags": [
+    "ai",
+    "transcription",
+    "whisper",
+    "audio",
+    "video"
+  ],
+  "dependencies": [
+    "aux4/config"
+  ],
+  "system": [
+    [
+      "test:node --version",
+      "brew:node",
+      "linux:nodejs"
+    ],
+    [
+      "test:curl --version",
+      "brew:curl",
+      "linux:curl"
+    ]
+  ],
+  "profiles": [
+    {
+      "name": "main",
+      "commands": [
+        {
+          "name": "transcribe",
+          "execute": [
+            "node ${packageDir}/lib/transcribe.mjs values(file, configFile, config)"
+          ],
+          "help": {
+            "text": "Transcribe an audio or video file to text with timestamps",
+            "variables": [
+              {
+                "name": "file",
+                "text": "Path or URL to the audio/video file",
+                "arg": true
+              },
+              {
+                "name": "configFile",
+                "text": "Configuration file path",
+                "default": ""
+              },
+              {
+                "name": "config",
+                "text": "Configuration profile name",
+                "default": ""
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

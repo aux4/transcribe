@@ -1,0 +1,32 @@
+name: Publish Package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "package/.aux4"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: cd package && aux4 test run
+
+      - name: Publish
+        uses: aux4/publish-package-action@v1
+        with:
+          token: ${{ secrets.AUX4_TOKEN }}

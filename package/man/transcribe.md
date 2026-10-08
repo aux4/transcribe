@@ -1,12 +1,12 @@
 #### Description
 
-The `transcribe` command converts an audio or video file into text with timestamps. It uses the OpenAI Whisper API to perform speech-to-text transcription and outputs a JSON array of timestamped segments.
+The `transcribe` command converts an audio or video file into text with timestamps. It delegates transcription to `aux4 whisper transcribe`, so any provider configured for the aux4/whisper package (OpenAI, OpenAI-compatible, local whisper.cpp, mlx) can be used, and outputs a JSON array of timestamped segments.
 
 The file can be a local path or a URL. When a URL is provided, the file is downloaded to a temporary location before transcription and cleaned up afterward.
 
-API credentials can be provided via:
-- **Environment variable** — `OPENAI_API_KEY` or `CODEX_API_KEY`
-- **Config file** — using `--configFile` and `--config` flags
+Provider and credentials are configured as for `aux4 whisper transcribe`:
+- **Environment variable** — `OPENAI_API_KEY` (or `CODEX_API_KEY`) for the default OpenAI provider
+- **Config file** — `--configFile` and `--config` select a section with `provider`, `model`, `apiKey`, `baseUrl`, `binary` (see `aux4 whisper transcribe`)
 
 Supported audio formats: mp3, mp4, mpeg, mpga, m4a, wav, webm.
 
@@ -38,12 +38,12 @@ Transcribe from a URL with config:
 aux4 transcribe https://example.com/audio.wav --configFile config.yaml --config transcribe
 ```
 
-Configuration file:
+Configuration file (local whisper.cpp):
 
 ```yaml
 config:
   transcribe:
-    model:
-      type: openai
-      api: default
+    provider: local
+    binary: /opt/homebrew/bin/whisper-cli
+    model: /path/to/ggml-large-v3-turbo.bin
 ```

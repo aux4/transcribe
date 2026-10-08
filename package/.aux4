@@ -2,7 +2,7 @@
   "scope": "aux4",
   "name": "transcribe",
   "version": "1.0.1",
-  "description": "Transcribe audio and video files to text with timestamps",
+  "description": "Transcribe audio and video files to timestamped text (uses aux4/whisper)",
   "license": "MIT",
   "tags": [
     "ai",
@@ -12,18 +12,13 @@
     "video"
   ],
   "dependencies": [
-    "aux4/config"
+    "aux4/whisper"
   ],
   "system": [
     [
       "test:node --version",
       "brew:node",
       "linux:nodejs"
-    ],
-    [
-      "test:curl --version",
-      "brew:curl",
-      "linux:curl"
     ]
   ],
   "profiles": [

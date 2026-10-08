@@ -31,27 +31,49 @@ permissions:
   contents: write
 
 jobs:
-  publish:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v6
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - uses: aux4/action@v1
+        with:
+          command: lint
+          strict: 'true'
+
+  test:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build
-        run: npm run build
+      - uses: aux4/action@v1
+        with:
+          command: test
+          system_packages: ffmpeg
+          build_command: npm run build
 
-      - name: Clean build artifacts
-        run: git checkout .
+  publish:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Mint hub publish token
         id: mint
@@ -63,9 +85,11 @@ jobs:
           TOK=$(curl -sf -u "$CLIENT_ID:$CLIENT_SECRET" -d grant_type=client_credentials https://sso.aux4.io/token | jq -r '.access_token // empty')
           if [ -z "$TOK" ]; then echo "::error::client_credentials mint returned no access_token"; exit 1; fi
           echo "::add-mask::$TOK"; echo "token=$TOK" >> "$GITHUB_OUTPUT"
-      - name: Publish package
-        uses: aux4/publish-package-action@v1
+
+      - uses: aux4/action@v1
         with:
+          command: publish
           level: ${{ inputs.level || 'patch' }}
+          build_command: npm run build
           aux4_token: ${{ steps.mint.outputs.token }}
           github_token: ${{ secrets.GITHUB_TOKEN }}

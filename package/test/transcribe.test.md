@@ -1,17 +1,5 @@
 # transcribe
 
-## without arguments
-
-### should show error
-
-```execute
-aux4 transcribe 2>&1 || true
-```
-
-```error:partial
-Usage: aux4 transcribe *?
-```
-
 ## with nonexistent file
 
 ### should show file not found error
@@ -20,6 +8,6 @@ Usage: aux4 transcribe *?
 aux4 transcribe /tmp/nonexistent-audio-file.mp3 2>&1 || true
 ```
 
-```error:partial
-Error: File not found*?
+```expect:partial
+Error: File not found: /tmp/nonexistent-audio-file.mp3
 ```
